@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import * as cors from 'cors';
 import * as fs from 'fs';
 import * as jwt from 'jsonwebtoken';
-import { verifyUser } from './authorization/authorization';
+import verifyUser from './authorization/authorization';
 
 const PORT = process.env.PORT || 3001;
 const { secret } = JSON.parse(fs.readFileSync('./.env.json', 'utf-8'));
@@ -29,17 +29,18 @@ const io = new Server(httpServer);
 io.use(async (socket, next) => {
     try {
         const user = await verifyUser(secret, socket);
+        // eslint-disable-next-line no-param-reassign
         socket[user] = user;
         console.log(user);
         next();
     } catch (error) {
-        console.log(error);
+        console.log(error.message);
         next(error);
     }
 });
 
 io.on('connection', async (socket) => {
-    console.log('conncted:' + socket.id);
+    console.log(`conncted:${socket.id}`);
 });
 
 httpServer.listen(PORT, () => {

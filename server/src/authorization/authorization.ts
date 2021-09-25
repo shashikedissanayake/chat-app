@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 
-export const verifyUser = async (secret: string, socket: any): Promise<any> => {
+const verifyUser = async (secret: string, socket: any): Promise<any> => {
     if (socket.handshake?.query?.token === undefined) {
         return Promise.reject(new Error('No token provided'));
     }
@@ -11,3 +11,5 @@ export const verifyUser = async (secret: string, socket: any): Promise<any> => {
         return Promise.reject(error);
     }
 };
+
+export default verifyUser;
