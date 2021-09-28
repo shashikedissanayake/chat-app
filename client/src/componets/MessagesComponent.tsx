@@ -3,15 +3,18 @@ import { UserContext } from "../contexts/UserContext";
 import { Message } from "../models/messages";
 import { User } from "../models/users";
 import * as moment from 'moment';
+import { MessageStatus } from "../constants/messageStatus";
 
 const MessagesComponent = ({ 
     messages, 
     sendMessage,
     selectedUser,
+    sendMessageStatus,
  }: { 
      messages: Message[], 
      sendMessage: (message: string) => void,
      selectedUser: User,
+     sendMessageStatus: (id: string, status: MessageStatus) => void,
 }) => {
     const { currentUser } = useContext(UserContext);
     const [message, setMessage] = useState('');
@@ -21,7 +24,7 @@ const MessagesComponent = ({
                 {
                     messages.map((message) => {
                         return (
-                            <div className={`message${message.from === currentUser.id ? ' sent':''}`} key={message.id}>
+                            <div style={{backgroundColor: message.status === MessageStatus.SENT ? 'azure' : 'lightsteelblue'}} onClick={() => sendMessageStatus(message.id, MessageStatus.VIEWED)} className={`message${message.from === currentUser.id ? ' sent':''}`} key={message.id}>
                                 <p>{ message.message }</p>
                                 <h1>{ message.from === currentUser.id ? currentUser.name : selectedUser.name }</h1>
                                 <h2>{ moment.utc(message.timestamp).local().format('YYYY/MM/DD HH:mm:ss') }</h2>

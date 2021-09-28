@@ -10,6 +10,7 @@ import verifyUser from './authorization/authorization';
 import usersRoutre from './controllers/usersController';
 import { getAllUsers, setIsOnline } from './db/users';
 import { Message } from './models/messagesModel';
+import { MessageStatus, MessageTypes } from './constants/messageStatus';
 
 const PORT = process.env.PORT || 3001;
 const { secret } = JSON.parse(fs.readFileSync('./.env.json', 'utf-8'));
@@ -49,17 +50,45 @@ io.on('connection', async (socket) => {
     io.emit('user-connected', { users: getAllUsers() });
 
     socket.on('private-message', (data, callback) => {
-        const message: Message = {
-            ...data,
-            id: uuidv4(),
-            from: id,
-            timestamp: moment().utc().format(),
-        };
-        socket.to(data.to).emit('private-message', { data: message });
+        console.log(data)
+        let message: Message;
+        let status: string;
+        switch (data.messageType as MessageTypes) {
+            case MessageTypes.CHAT_MESSAGES: {
+                message = {
+                    id: uuidv4(),
+                    from: id,
+                    timestamp: moment().utc().format(),
+                    status: MessageStatus.SENT,
+                    messageType: MessageTypes.CHAT_MESSAGES,
+                    to: data.to,
+                    message: data.message,
+                };
+                status = 'OK';
+                break;
+            }
+            case MessageTypes.STATUS_UPDATES: {
+                message = {
+                    id: data.id,
+                    from: id,
+                    timestamp: moment().utc().format(),
+                    status: data.status,
+                    messageType: MessageTypes.STATUS_UPDATES,
+                    to: data.to,
+                };
+                status = 'OK';
+                break;
+            }
+            default: {
+                status = 'FAILED';
+                console.log('Unknown message type');
+            }
+        }
+        socket.to(data.to).emit('private-message', { message });
 
         callback({
-            status: 'ok',
-            data: message,
+            status,
+            message,
         });
     });
 
