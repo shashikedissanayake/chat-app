@@ -3,6 +3,7 @@ import LoginComponent from './componets/LoginComponent';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import UserContextProvider from './contexts/UserContext';
 import HomeComponent from './componets/HomeComponet';
+import ChatContextProvider from './contexts/ChatContext';
 
 function App() {
   return (
@@ -11,8 +12,10 @@ function App() {
         <h1>Chat app</h1>
         <Switch>
           <UserContextProvider>
-            <Route exact path="/"><HomeComponent /></Route>
-          <Route exact path="/login"><LoginComponent /></Route>
+            <ChatContextProvider>
+              <Route exact path="/"><HomeComponent /></Route>
+            <Route exact path="/login"><LoginComponent /></Route>
+            </ChatContextProvider>
           </UserContextProvider>
         </Switch>
       </div>

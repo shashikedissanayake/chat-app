@@ -50,7 +50,7 @@ io.on('connection', async (socket) => {
     io.emit('user-connected', { users: getAllUsers() });
 
     socket.on('private-message', (data, callback) => {
-        console.log(data)
+        console.log(data);
         let message: Message;
         let status: string;
         switch (data.messageType as MessageTypes) {
