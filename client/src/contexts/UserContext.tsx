@@ -1,10 +1,12 @@
 import { createContext, useState } from "react";
-import { CurrentUser } from "../models/users";
+import { UserContextModel } from "../models/contexts";
+import { CurrentUser, User } from "../models/users";
 
-export const UserContext = createContext<any>(undefined);
+export const UserContext = createContext<UserContextModel>({} as UserContextModel);
 
 const UserContextProvider = (props: any) => {
     const [currentUser, setCurrentUser] = useState<CurrentUser | undefined>(undefined);
+    const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
 
     const setUser = (user: CurrentUser) => {
         setCurrentUser(user);
@@ -15,7 +17,7 @@ const UserContextProvider = (props: any) => {
     }
 
     return (
-        <UserContext.Provider value={{ currentUser, setUser, removeUser } as any}>
+        <UserContext.Provider value={{ currentUser, setUser, removeUser, selectedUser, setSelectedUser }}>
             {props.children}
         </UserContext.Provider>
     );

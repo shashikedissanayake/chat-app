@@ -1,19 +1,25 @@
-import { User } from "../models/users";
+import { useContext } from "react";
+import { ChatContext } from "../contexts/ChatContext";
+import { UserContext } from "../contexts/UserContext";
+import { ChatContextModel, UserContextModel } from "../models/contexts";
 
-const UsersComponent = ({ 
-    users, 
-    handleClick, 
-    selectedUser 
-}: { 
-    users: User[], 
-    handleClick: (id: string) => void, 
-    selectedUser: User | undefined,
-}) => {
-  
+const UsersComponent = () => {
+    const { selectedUser, setSelectedUser } = useContext<UserContextModel>(UserContext);
+    const { users } = useContext<ChatContextModel>(ChatContext);
+
+    const handleClick = (id: string) => {
+        const user = users.find((user) => {
+            return user.id === id;
+        });
+
+        if (user) {
+            setSelectedUser(user);
+        }
+    }
     return (
         <div className="users">
             {
-                users.map((user) => {
+                users?.map((user) => {
                     return (
                         <div className={`user${user?.id === selectedUser?.id ? ' selected':''}`} key={user.id} onClick={(e) => {e.preventDefault(); handleClick(user.id)}}>
                             <h2>{ user.name }</h2>
