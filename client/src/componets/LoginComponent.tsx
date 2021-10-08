@@ -27,7 +27,7 @@ const LoginComponent = () => {
         fetch(`${url}/users/login`, {
             method: 'POST', 
             headers: { 'Content-type': 'Application/JSON'}, 
-            body: JSON.stringify({ userName, password })})
+            body: JSON.stringify({ userId: userName, password })})
             .then((res) => {
                 if (!res.ok) {
                     throw new Error('Login failed');

@@ -4,7 +4,7 @@ import { CurrentUser, User } from "./users";
 export interface ChatContextModel {
     users: User[];
     messages: Message[];
-    setUsers: (user: User[]) => void;
+    updateUsers: (users: User | User[]) => void;
     updateMessages: (messages: Message) => void;
 }
 

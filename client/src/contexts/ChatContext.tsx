@@ -25,8 +25,25 @@ const ChatContextProvider = (props: any) => {
         });
     }
 
+    const updateUsers = (users: User | User[]) => {
+        if (users instanceof Array) {
+            setUsers(users);
+        } else {
+            setUsers( previousUsers => {
+                const usersList = [...previousUsers];
+                const updatedUser = usersList.find((user) => {
+                    return user.id === users.id;
+                });
+                if (updatedUser) {
+                    updatedUser.isOnline = users.isOnline;
+                }
+                return usersList;
+            })
+        }
+    }
+
     return (
-        <ChatContext.Provider value={{ users, messages, setUsers, updateMessages }}>
+        <ChatContext.Provider value={{ users, messages, updateUsers, updateMessages }}>
             { props.children }
         </ChatContext.Provider>
     );

@@ -7,7 +7,7 @@ import { ChatContextModel } from "../models/contexts";
 import { User } from "../models/users";
 
 const useSocket = (url: string, token: string | undefined) => {
-    const { messages, setUsers, updateMessages } = useContext<ChatContextModel>(ChatContext);
+    const { messages, updateUsers, updateMessages } = useContext<ChatContextModel>(ChatContext);
     const socketRef = useRef<Socket | undefined>(undefined);
     const [isPending, setIsPending] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -39,6 +39,11 @@ const useSocket = (url: string, token: string | undefined) => {
                 }
             
             });
+
+            newSocket.on('connected-success', (data:{ users: User[]}) => {
+                console.log(data);
+                updateUsers(data.users);
+            })
             
             newSocket.on('connect_error', (err) => {
                 console.log(`error:${err.message}`);
@@ -46,14 +51,14 @@ const useSocket = (url: string, token: string | undefined) => {
                 setError(err.message);
             });
             
-            newSocket.on('user-connected', (data:{ users: User[]}) => {
+            newSocket.on('user-connected', (data:{ user: User}) => {
                 console.log(`users:${JSON.stringify(data)}`);
-                setUsers(data.users);
+                updateUsers(data.user);
             });
             
-            newSocket.on('user-disconnected', (data:{ users: User[]}) => {
+            newSocket.on('user-disconnected', (data:{ user: User}) => {
                 console.log(`users:${JSON.stringify(data)}`);
-                setUsers(data.users);
+                updateUsers(data.user);
             });
             return () => { newSocket.disconnect() };
         } else {
