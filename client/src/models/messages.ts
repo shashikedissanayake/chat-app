@@ -29,6 +29,7 @@ export interface StatusSent {
     to: string;
     id: string;
     status: MessageStatus;
+    timestamp: string;
     messageType: MessageTypes;
 }
 

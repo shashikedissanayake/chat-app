@@ -7,25 +7,18 @@ export interface MessageRecord {
     to: string;
     from: string;
     timestamp: string;
+    viewedTimestamp?: string;
     message: string;
     status: MessageStatus;
-    messageType: MessageTypes;
 }
 
-export type Message = Omit<MessageRecord, 'PK' | 'SK'>;
-
-export interface DeliveryRecord {
-    PK: string;
-    SK: string;
-    id: string;
-    to: string;
-    from: string;
-    timestamp: string;
-    status: MessageStatus;
+export type Message = Omit<MessageRecord, 'PK' | 'SK'> & {
     messageType: MessageTypes;
-}
+};
 
-export type MessageDeliveyRecord = Omit<DeliveryRecord, 'PK' | 'SK'>;
+export type MessageDeliveyRecord = Omit<MessageRecord, 'PK' | 'SK' | 'message'> & {
+    messageType: MessageTypes;
+};
 
 export interface GetMessagesByRoomIdResponse {
     messages: Message[];

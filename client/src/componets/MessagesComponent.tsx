@@ -41,7 +41,7 @@ const MessagesComponent = ({
         }
     }
 
-    const sendStatusUpdate = (messageId: string, status: MessageStatus) => {
+    const sendStatusUpdate = (messageId: string, timestamp: string, status: MessageStatus) => {
         if (selectedUser && currentUser) {
             const message = messages.find((message) => {
                 return message.id === messageId;
@@ -50,6 +50,7 @@ const MessagesComponent = ({
                 const currentMessage: StatusSent = {
                     to: selectedUser.id,
                     id: messageId,
+                    timestamp,
                     status,
                     messageType: MessageTypes.STATUS_UPDATES,
                 };
@@ -74,7 +75,7 @@ const MessagesComponent = ({
                         return (message.from === currentUser?.id && message.to === selectedUser?.id) || (message.from === selectedUser?.id && message.to === currentUser?.id);
                     }).map((message) => {
                         return (
-                            <div style={{backgroundColor: message.status === MessageStatus.SENT ? 'azure' : 'lightsteelblue'}} onClick={() => sendStatusUpdate(message.id, MessageStatus.VIEWED)} className={`message${message.from === currentUser?.id ? ' sent':''}`} key={message.id}>
+                            <div style={{backgroundColor: message.status === MessageStatus.SENT ? 'azure' : 'lightsteelblue'}} onClick={() => sendStatusUpdate(message.id, message.timestamp, MessageStatus.VIEWED)} className={`message${message.from === currentUser?.id ? ' sent':''}`} key={message.id}>
                                 <p>{ message.message }</p>
                                 <h1>{ message.from === currentUser?.id ? currentUser?.name : selectedUser?.name }</h1>
                                 <h2>{ moment.utc(message.timestamp).local().format('YYYY/MM/DD HH:mm:ss') }</h2>

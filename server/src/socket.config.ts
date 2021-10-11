@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { Server as SocketServer } from 'socket.io';
 import verifyUser from './authorization/authorization';
 import { Message, MessageDeliveyRecord } from './models/messagesModel';
-import { MessageStatus } from './constants/messageStatus';
+import { MessageStatus, MessageTypes } from './constants/messageStatus';
 import { UserService } from './services/usersService';
 import { UserDetails } from './models/usersModel';
 import { MessagesService } from './services/messagesService';
@@ -38,21 +38,48 @@ const createSocketServer = (server: Server, userService: UserService, messageSer
 
             try {
                 const roomId = data.to < id ? `${id}-${data.to}` : `${data.to}-${id}`;
-                const message: Message | MessageDeliveyRecord = await messageService.storeMessage(
-                    roomId,
-                    data.to,
-                    id,
-                    data.messageType,
-                    data.message,
-                    data.id,
-                    data.status ?? MessageStatus.SENT,
-                );
-                socket.to(data.to).emit('private-message', { message });
+                switch (data.messageType) {
+                    case MessageTypes.CHAT_MESSAGES: {
+                        const message: Message = await messageService.storeMessage(
+                            roomId,
+                            data.to,
+                            id,
+                            data.message,
+                            data.messageType,
+                        );
+                        socket.to(data.to).emit('private-message', { message });
 
-                callback({
-                    status: 'OK',
-                    message,
-                });
+                        callback({
+                            status: 'OK',
+                            message,
+                        });
+                        break;
+                    }
+                    case MessageTypes.STATUS_UPDATES: {
+                        const message: MessageDeliveyRecord = await messageService.changeDelivaryStatusByMessageId(
+                            roomId,
+                            id,
+                            data.to,
+                            data.timestamp,
+                            data.id,
+                            data.status ?? MessageStatus.SENT,
+                            data.messageType,
+                        );
+                        socket.to(data.to).emit('private-message', { message });
+
+                        callback({
+                            status: 'OK',
+                            message,
+                        });
+                        break;
+                    }
+                    default: {
+                        console.log('Unknown message type');
+                        callback({
+                            status: 'FAILED',
+                        });
+                    }
+                }
             } catch (error) {
                 callback({
                     status: 'FAILED',
