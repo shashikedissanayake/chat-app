@@ -16,12 +16,12 @@ export class UserService {
 
     public async getAllUsers(): Promise<GetAllUsersResponse> {
         try {
-            const users: User[] = await this.db.getItemsByIndexWithSortKey(TableTypes.CHAT_TABLE, {
+            const { data }: { data: User[] } = await this.db.getItemsByIndexWithSortKey(TableTypes.CHAT_TABLE, {
                 keyCondition: 'PK = :key_0',
                 keyValue: [`${DBPrefixes.USERS}`],
             });
             return Promise.resolve(
-                users.map((user) => {
+                data.map((user) => {
                     return {
                         id: user.id,
                         name: user.name,

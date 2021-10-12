@@ -4,7 +4,7 @@ import { UserContext } from "../contexts/UserContext";
 import { ChatContextModel, UserContextModel } from "../models/contexts";
 
 const UsersComponent = () => {
-    const { selectedUser, setSelectedUser } = useContext<UserContextModel>(UserContext);
+    const { selectedUser, setSelectedUser, setSelectedRoomId, currentUser } = useContext<UserContextModel>(UserContext);
     const { users } = useContext<ChatContextModel>(ChatContext);
 
     const handleClick = (id: string) => {
@@ -12,10 +12,12 @@ const UsersComponent = () => {
             return user.id === id;
         });
 
-        if (user) {
+        if (user && currentUser) {
             setSelectedUser(user);
+            setSelectedRoomId(currentUser.id > user.id ? `${currentUser.id}-${user.id}` : `${user.id}-${currentUser.id}`);
         }
     }
+
     return (
         <div className="users">
             {

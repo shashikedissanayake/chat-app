@@ -5,7 +5,7 @@ import { MessageStatus, MessageTypes } from '../constants/messageStatus';
 import { DBPrefixes, TableTypes } from '../constants/tableNames';
 import { DatabaseAdapter } from '../dependency/database/databaseAdapter';
 import { DynamoDbAdapterImpl } from '../dependency/database/dynamodb/dynamoDbAdapterImpl';
-import { Message, MessageDeliveyRecord, MessageRecord } from '../models/messagesModel';
+import { GetMessagesByRoomIdResponse, Message, MessageDeliveyRecord, MessageRecord } from '../models/messagesModel';
 
 @injectable()
 export class MessagesService {
@@ -101,34 +101,43 @@ export class MessagesService {
         }
     }
 
-    // public async getMessagesByRoomId(roomId: string, lastKey?: string): Promise<GetMessagesByRoomIdResponse> {
-    //     try {
-    //         const messageList: MessageRecord[] = await this.db.getItemsByIndexWithSortKey(
-    //             TableTypes.CHAT_TABLE,
-    //             {
-    //                 keyCondition: `PK = :key_0 AND begins_with(SK, :key_1)`,
-    //                 keyValue: [`${DBPrefixes.ROOMS}#${roomId}`, DBPrefixes.MESSAGES],
-    //             },
-    //             { startKey: lastKey, sort: 'descending', limit: 10 },
-    //         );
+    public async getMessagesByRoomId(
+        roomId: string,
+        pageSize: number,
+        lastKey?: any,
+    ): Promise<GetMessagesByRoomIdResponse> {
+        try {
+            const { data, lastEvaluatedKey }: { data: MessageRecord[]; lastEvaluatedKey: any } =
+                await this.db.getItemsByIndexWithSortKey(
+                    TableTypes.CHAT_TABLE,
+                    {
+                        keyCondition: `PK = :key_0 AND begins_with(SK, :key_1)`,
+                        keyValue: [`${DBPrefixes.ROOMS}#${roomId}`, DBPrefixes.MESSAGES],
+                    },
+                    { startKey: lastKey, sort: 'descending', limit: pageSize },
+                );
 
-    //         if (!messageList || messageList?.length < 1) {
-    //             return Promise.resolve({ messages: [], lastKey: undefined } as GetMessagesByRoomIdResponse);
-    //         }
+            if (!data || data?.length < 1) {
+                return Promise.resolve({ messages: [], lastEvaluatedKey: undefined } as GetMessagesByRoomIdResponse);
+            }
 
-    //         const batchGetItemInput = {};
-    //         batchGetItemInput[TableTypes.CHAT_TABLE] = messageList.map((message) => {
-    //             return {
-    //                 keyCondition: `PK = :key_0 AND begins_with(SK, :key_1)`,
-    //                 keyValue: [`${message.PK}`, `${DBPrefixes.SEEN}#${message.id}`],
-    //             };
-    //         });
-    //         console.log(batchGetItemInput);
-    //         const viewedList = await this.db.getBatchItem([TableTypes.CHAT_TABLE], batchGetItemInput);
-    //         console.log(viewedList)
-    //         return Promise.resolve({ messages: [], lastKey: undefined });
-    //     } catch (error) {
-    //         return Promise.reject(error);
-    //     }
-    // }
+            return Promise.resolve({
+                messages: data.map((message) => {
+                    return {
+                        id: message.id,
+                        from: message.from,
+                        to: message.to,
+                        message: message.message,
+                        messageType: MessageTypes.CHAT_MESSAGES,
+                        status: message.status,
+                        timestamp: message.timestamp,
+                        viewedTimestamp: message.viewedTimestamp,
+                    } as Message;
+                }),
+                lastEvaluatedKey,
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
 }

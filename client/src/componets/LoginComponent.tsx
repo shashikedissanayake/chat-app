@@ -1,7 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import { BackendContext } from "../contexts/BackendContext";
+import { ChatContext } from "../contexts/ChatContext";
 import { UserContext } from "../contexts/UserContext";
+import { ChatContextModel } from "../models/contexts";
 
 const LoginComponent = () => {
     const [userName, setUserName] = useState('');
@@ -11,6 +13,7 @@ const LoginComponent = () => {
 
     const url = useContext(BackendContext);
     const { currentUser, setUser } = useContext(UserContext);
+    const { updateUsers } = useContext<ChatContextModel>(ChatContext);
     const history = useHistory();
 
     const handleChangeUserName = (e: any) => {
@@ -35,9 +38,11 @@ const LoginComponent = () => {
                 return res.json();
             })
             .then((data) => {
+                console.log(data.data)
                 setIsPending(false);
                 setError(null);
-                setUser({...data.data, isOnline: false });
+                setUser({ id: data.data.id, name: data.data.name, token: data.data.token, isOnline: false });
+                updateUsers(data.data.users);
                 history.push('/');
             })
             .catch((err) => {

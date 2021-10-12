@@ -28,9 +28,14 @@ export interface MessagesSent {
 export interface StatusSent {
     to: string;
     id: string;
-    status: MessageStatus;
     timestamp: string;
+    status: MessageStatus;
     messageType: MessageTypes;
 }
 
 export type MessageComponent = Omit<Message, 'id'>;
+
+export interface LastEvaluatedKey {
+    PK: string;
+    SK: string;
+}

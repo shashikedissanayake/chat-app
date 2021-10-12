@@ -218,7 +218,7 @@ export class DynamoDbAdapterImpl implements DatabaseAdapter {
                 } else {
                     Logger.debug(DynamoDbAdapterImpl.name, 'getItemsByIndexWithSortKey', data);
                     // console.log('Get all Items succeeded:', JSON.stringify(data, null, 2));
-                    resolve(data.Items);
+                    resolve({ data: data.Items, lastEvaluatedKey: data.LastEvaluatedKey });
                 }
             });
         });

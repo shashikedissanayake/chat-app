@@ -39,11 +39,6 @@ const useSocket = (url: string, token: string | undefined) => {
                 }
             
             });
-
-            newSocket.on('connected-success', (data:{ users: User[]}) => {
-                console.log(data);
-                updateUsers(data.users);
-            })
             
             newSocket.on('connect_error', (err) => {
                 console.log(`error:${err.message}`);

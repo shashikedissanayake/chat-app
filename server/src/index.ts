@@ -21,8 +21,7 @@ app.get('/', async (req, res) => {
 
 const userService = container.resolve<UserService>(UserService);
 const messageService = container.resolve<MessagesService>(MessagesService);
-app.use('/users', usersRouter(userService));
-// messageService.getMessagesByRoomId('2_client-1_client');
+app.use('/users', usersRouter(userService, messageService));
 const httpServer = createServer(app);
 
 createSocketServer(httpServer, userService, messageService);

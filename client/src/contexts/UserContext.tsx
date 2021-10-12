@@ -7,6 +7,7 @@ export const UserContext = createContext<UserContextModel>({} as UserContextMode
 const UserContextProvider = (props: any) => {
     const [currentUser, setCurrentUser] = useState<CurrentUser | undefined>(undefined);
     const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
+    const [selectedRoomId, setSelectedRoomId] = useState<string | undefined>(undefined);
 
     const setUser = (user: CurrentUser) => {
         setCurrentUser(user);
@@ -17,7 +18,7 @@ const UserContextProvider = (props: any) => {
     }
 
     return (
-        <UserContext.Provider value={{ currentUser, setUser, removeUser, selectedUser, setSelectedUser }}>
+        <UserContext.Provider value={{ currentUser, setUser, removeUser, selectedUser, setSelectedUser, selectedRoomId, setSelectedRoomId }}>
             {props.children}
         </UserContext.Provider>
     );

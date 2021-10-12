@@ -10,7 +10,7 @@ import { MessagesService } from './services/messagesService';
 
 const { secret } = JSON.parse(fs.readFileSync('./.env.json', 'utf-8'));
 
-const createSocketServer = (server: Server, userService: UserService, messageService: MessagesService): void => {
+const createSocketServer = (server: Server, userService: UserService, messageService: MessagesService) => {
     const io = new SocketServer(server);
     io.use(async (socket, next) => {
         try {
@@ -30,8 +30,7 @@ const createSocketServer = (server: Server, userService: UserService, messageSer
         const { id } = socket.handshake.auth.user;
         const updatedUser: UserDetails = await userService.setOnline(id, true);
         socket.join(id);
-        socket.broadcast.emit('user-connected', { user: updatedUser });
-        socket.emit('connected-success', { users: await userService.getAllUsers() });
+        io.emit('user-connected', { user: updatedUser });
 
         socket.on('private-message', async (data, callback) => {
             console.log(data);

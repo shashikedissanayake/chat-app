@@ -7,14 +7,16 @@ import { Socket } from "socket.io-client";
 import { ChatContextModel, UserContextModel } from "../models/contexts";
 import { ChatContext } from "../contexts/ChatContext";
 import { useHistory } from "react-router";
+import { BackendContext } from "../contexts/BackendContext";
 
 const MessagesComponent = ({
     socketRef,
  }: {
      socketRef: { current: Socket | undefined }
 }) => {
-    const { currentUser, selectedUser } = useContext<UserContextModel>(UserContext);
-    const { updateMessages, messages }  = useContext<ChatContextModel>(ChatContext);
+    const { currentUser, selectedUser, selectedRoomId } = useContext<UserContextModel>(UserContext);
+    const { updateMessages, messages, lastEvaluatedKey, setLastEvaluatedKey, cleanMessages }  = useContext<ChatContextModel>(ChatContext);
+    const url = useContext(BackendContext);
     const [message, setMessage] = useState('');
     const history = useHistory();
 
@@ -22,7 +24,37 @@ const MessagesComponent = ({
         if (!currentUser || !selectedUser || !socketRef.current) {
             history.push('/login');
         }
-    }, [socketRef, currentUser, selectedUser, history]);
+        cleanMessages();
+        getChatHistory();
+    }, [socketRef, currentUser, selectedUser, history, url]);
+
+    const getChatHistory = (lastEvaluatedKey?: any) => {
+        console.log(`${url}/users/chat/${selectedRoomId}`)
+        if (selectedRoomId) {
+            fetch(`${url}/users/chat/${selectedRoomId}`, {
+                method: 'POST', 
+                headers: { 'Content-type': 'Application/JSON'}, 
+                body: JSON.stringify({ pageSize: 10, lastEvaluatedKey })})
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error('Login failed');
+                    }
+                    return res.json();
+                })
+                .then((data) => {
+                    console.log(data)
+                    if (data.code !== 200) {
+                        console.log(data.message);
+                    } else {
+                        updateMessages(data.data.messages);
+                        setLastEvaluatedKey(data.data.lastEvaluatedKey);
+                    }
+                })
+                .catch((err) => {
+                    console.log(err.message);
+                });
+        }
+    }
 
     const sendMessage = (e: any) => {
         e.preventDefault();
@@ -39,6 +71,7 @@ const MessagesComponent = ({
                 }
             });
         }
+        setMessage('');
     }
 
     const sendStatusUpdate = (messageId: string, timestamp: string, status: MessageStatus) => {
@@ -70,6 +103,7 @@ const MessagesComponent = ({
     return (
         <div className="messages-container">
             <div className="messages">
+                { lastEvaluatedKey && <button onClick={() => getChatHistory(lastEvaluatedKey)}>loadMore</button>}
                 {
                     messages.filter((message) => {
                         return (message.from === currentUser?.id && message.to === selectedUser?.id) || (message.from === selectedUser?.id && message.to === currentUser?.id);

@@ -22,5 +22,5 @@ export type MessageDeliveyRecord = Omit<MessageRecord, 'PK' | 'SK' | 'message'> 
 
 export interface GetMessagesByRoomIdResponse {
     messages: Message[];
-    lastKey: string;
+    lastEvaluatedKey: string;
 }
